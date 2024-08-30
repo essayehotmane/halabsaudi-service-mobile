@@ -1,20 +1,55 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// App.tsx
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { ActivityIndicator, View, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AuthStack from './navigation/AuthStack';
+import HomeScreen from './screens/HomeScreen';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+const App: React.FC = () => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [token, setToken] = useState<string | null>(null);
+    const [user, setUser] = useState<any | null>(null);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    useEffect(() => {
+        const checkToken = async () => {
+            const storedToken = await AsyncStorage.getItem('token');
+            const expirationTime = await AsyncStorage.getItem('tokenExpiration');
+            const storedUser = await AsyncStorage.getItem('user');
+
+            if (storedUser && storedToken && expirationTime) {
+                const currentTime = Date.now();
+                if (currentTime < parseInt(expirationTime, 10)) {
+                    setIsAuthenticated(true);
+                    setToken(storedToken); // Store the token in state
+                    setUser(storedUser); // Store the token in state
+                } else {
+                    await AsyncStorage.removeItem('token');
+                    await AsyncStorage.removeItem('tokenExpiration');
+                    await AsyncStorage.removeItem('user');
+                    Alert.alert('Session expired', 'Please log in again.');
+                }
+            }
+            setIsLoading(false);
+        };
+
+        checkToken();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    return (
+        <NavigationContainer>
+            {isAuthenticated ? <HomeScreen token={token} user={user} /> : <AuthStack />}
+        </NavigationContainer>
+    );
+};
+
+export default App;
