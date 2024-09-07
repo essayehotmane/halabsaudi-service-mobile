@@ -26,7 +26,6 @@ const HeaderLogo: React.FC<HeaderLogoProps> = ({ pageTitle, isRtl }) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: '#fff', // Background color to match the design
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,

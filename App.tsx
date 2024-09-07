@@ -9,8 +9,6 @@ import HomeScreen from './screens/HomeScreen';
 const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState<any | null>(null);
 
     useEffect(() => {
         const checkToken = async () => {
@@ -22,8 +20,6 @@ const App: React.FC = () => {
                 const currentTime = Date.now();
                 if (currentTime < parseInt(expirationTime, 10)) {
                     setIsAuthenticated(true);
-                    setToken(storedToken); // Store the token in state
-                    setUser(storedUser); // Store the token in state
                 } else {
                     await AsyncStorage.removeItem('token');
                     await AsyncStorage.removeItem('tokenExpiration');
@@ -47,7 +43,7 @@ const App: React.FC = () => {
 
     return (
         <NavigationContainer>
-            {isAuthenticated ? <HomeScreen token={token} user={user} /> : <AuthStack />}
+            {isAuthenticated ? <HomeScreen /> : <AuthStack />}
         </NavigationContainer>
     );
 };
